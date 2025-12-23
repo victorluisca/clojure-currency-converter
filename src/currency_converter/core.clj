@@ -40,17 +40,34 @@
   [currencies]
   (if (:error currencies)
     (str "Error: " (:message currencies))
-    (->> currencies
-         (sort)
-         (map (fn [[code full-name]] (str "  " (name code) "  " full-name)))
-         (str/join "\n"))))
+    (let [header "Supported currencies:\n"
+          list-str (->> currencies
+                        (sort)
+                        (map (fn [[code full-name]] (str "    " (name code) "  " full-name)))
+                        (str/join "\n"))]
+      (str header list-str))))
+
+(defn format-usage
+  ([]
+   (->> ["Usage:"
+         "  currency-converter <amount> [OPTIONS]"
+         ""
+         "For more information, try \"--help\"."]
+        (str/join "\n")))
+  ([summary]
+   (->> ["Currency Converter CLI"
+         ""
+         "Usage:"
+         "  currency-converter <amount> [OPTIONS]"
+         ""
+         "Options:"
+         summary]
+        (str/join "\n"))))
 
 (def cli-options
   [["-f" "--from CURRENCY" "Source currency code"
-    :default "USD"
     :parse-fn #(str/upper-case %)]
    ["-t" "--to CURRENCY"   "Target currency code"
-    :default "BRL"
     :parse-fn #(str/upper-case %)]
    ["-l" "--list"          "List all supported currencies"]
    ["-h" "--help"]])
@@ -60,10 +77,12 @@
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     (cond
       (:help options)
-      (println summary)
+      (println (format-usage summary))
 
       errors
-      (println (str/join "\n" errors))
+      (do (doseq [e errors]
+            (println (str "Error: " (str/lower-case e))))
+          (println "\n" (format-usage)))
 
       (:list options)
       (println (display-currencies (fetch-currencies)))
