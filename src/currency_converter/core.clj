@@ -1,7 +1,8 @@
 (ns currency-converter.core
   (:require [clojure.tools.cli :refer [parse-opts]]
             [clj-http.client   :as http]
-            [clojure.string    :as str]))
+            [clojure.string    :as str])
+  (:gen-class))
 
 (defn get-json
   ([url]

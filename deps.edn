@@ -7,4 +7,6 @@
   org.clojure/tools.cli {:mvn/version "1.1.230"}}
 
  :aliases
- {:run {:main-opts ["-m" "currency-converter.core"]}}}
+ {:run {:main-opts ["-m" "currency-converter.core"]}
+  :build {:replace-deps {io.github.clojure/tools.build {:git/tag "v0.10.11", :git/sha "c6c670a4ea82709d7f88aa3a9e35e0be76342417"}}
+          :ns-default build}}}
