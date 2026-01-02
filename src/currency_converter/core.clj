@@ -28,26 +28,6 @@
   []
   (get-json "https://api.frankfurter.dev/v1/currencies"))
 
-(defn display-conversion
-  [data target-currency]
-  (if (:error data)
-    (str "Error: " (:message data))
-    (let [amount (:amount data)
-          base (:base data)
-          rate (get-in data [:rates (keyword target-currency)])]
-      (str amount " " base " = " rate " " target-currency))))
-
-(defn display-currencies
-  [currencies]
-  (if (:error currencies)
-    (str "Error: " (:message currencies))
-    (let [header "Supported currencies:\n"
-          list-str (->> currencies
-                        (sort)
-                        (map (fn [[code full-name]] (str "    " (name code) "  " full-name)))
-                        (str/join "\n"))]
-      (str header list-str))))
-
 (defn format-usage
   ([]
    (->> ["Usage:"
@@ -64,6 +44,26 @@
          "Options:"
          summary]
         (str/join "\n"))))
+
+(defn display-conversion
+  [data target-currency]
+  (if (:error data)
+    (str "Error: " (:message data) "\n\n" (format-usage))
+    (let [amount (:amount data)
+          base (:base data)
+          rate (get-in data [:rates (keyword target-currency)])]
+      (str amount " " base " = " rate " " target-currency))))
+
+(defn display-currencies
+  [currencies]
+  (if (:error currencies)
+    (str "Error: " (:message currencies) "\n\n" (format-usage))
+    (let [header "Supported currencies:\n"
+          list-str (->> currencies
+                        (sort)
+                        (map (fn [[code full-name]] (str "    " (name code) "  " full-name)))
+                        (str/join "\n"))]
+      (str header list-str))))
 
 (def cli-options
   [["-f" "--from CURRENCY" "Source currency code"
@@ -93,4 +93,5 @@
         (let [target (:to options)
               result (fetch-rates amount (:from options) target)]
           (println (display-conversion result target)))
-        (println "Error: please provide a valid numeric amount.")))))
+        (do (println "Error: please provide a valid numeric amount.")
+            (println "\n" (format-usage)))))))
