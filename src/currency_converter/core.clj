@@ -5,6 +5,9 @@
   (:gen-class))
 
 (defn get-json
+  "Makes an HTTP GET request to the given url.
+   Optionally takes a map of query parameters.
+   Returns the JSON-parsed body as a map or an error map if the request fails."
   ([url]
    (get-json url {}))
   ([url params]
@@ -18,6 +21,8 @@
         :message (.getMessage e)}))))
 
 (defn fetch-rates
+  "Requests the latest exchange rates from the Frankfurter API
+   for a specific amount and currency pair."
   [amount from to]
   (get-json "https://api.frankfurter.dev/v1/latest"
             {:amount amount
@@ -25,10 +30,14 @@
              :to     to}))
 
 (defn fetch-currencies
+  "Fetches a map of all currency codes and their full names
+   from the Frankfurter API."
   []
   (get-json "https://api.frankfurter.dev/v1/currencies"))
 
 (defn format-usage
+  "Returns usage string.
+   Optionally takes a summary to display together with the usage."
   ([]
    (->> ["Usage:"
          "  currency-converter <amount> [OPTIONS]"
@@ -46,6 +55,9 @@
         (str/join "\n"))))
 
 (defn display-conversion
+  "Formats the conversion result into a readable string.
+   If the input contains an error, returns a formatted error message
+   with usage instructions."
   [data target-currency]
   (if (:error data)
     (str "Error: " (:message data) "\n\n" (format-usage))
@@ -55,6 +67,9 @@
       (str amount " " base " = " rate " " target-currency))))
 
 (defn display-currencies
+  "Formats the map of available currencies into a sorted list string.
+   If the inputs contains an error, returns a formatted error message
+   with usage instructions."
   [currencies]
   (if (:error currencies)
     (str "Error: " (:message currencies) "\n\n" (format-usage))
